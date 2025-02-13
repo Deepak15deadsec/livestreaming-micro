@@ -6,20 +6,20 @@ import { CreateBookDto } from '@app/contracts/books/create-book.dto';
 
 @Injectable()
 export class BooksService {
-private books:BookDto[] = [
-  {
-    id:1,
-    title: 'Title 1',
-    author: 'Author 1',
-    rating: 3.9,
-  },
-  {
-    id:2,
-    title : 'Title2',
-    author:'Author 2',
-    rating: 4.7,
-  },
-];
+  private books: BookDto[] = [
+    {
+      id: 1,
+      title: 'Title 1',
+      author: 'Author 1',
+      rating: 3.9,
+    },
+    {
+      id: 2,
+      title: 'Title2',
+      author: 'Author 2',
+      rating: 4.7,
+    },
+  ];
 
   create(createBookDto: CreateBookDto) {
     const newbook: BookDto = {

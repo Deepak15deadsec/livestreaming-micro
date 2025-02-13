@@ -10,6 +10,15 @@
   "monorepo": true,
   "root": "apps/bookstore-api-gateway",
   "projects": {
+    "api-gateway": {
+      "type": "application",
+      "root": "apps/api-gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/api-gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
+      }
+    },
     "books": {
       "type": "application",
       "root": "apps/books",
@@ -37,13 +46,13 @@
         "tsConfigPath": "libs/contracts/tsconfig.lib.json"
       }
     },
-    "users": {
+    "rtsp": {
       "type": "application",
-      "root": "apps/users",
+      "root": "apps/rtsp",
       "entryFile": "main",
-      "sourceRoot": "apps/users/src",
+      "sourceRoot": "apps/rtsp/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/users/tsconfig.app.json"
+        "tsConfigPath": "apps/rtsp/tsconfig.app.json"
       }
     }
   }
