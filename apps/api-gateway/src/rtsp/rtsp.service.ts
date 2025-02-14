@@ -5,15 +5,15 @@ import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class RtspService {
-  constructor(@Inject('RTSP_CLIENT') private rtspClient: ClientProxy) {}
+  constructor(@Inject('RTSP_CLIENT') private rtspClient: ClientProxy) { }
 
   create(createRtspDto: CreateRtspDto) {
-    return this.rtspClient.send('createRtsp',createRtspDto);
+    return this.rtspClient.send('createRtsp', createRtspDto);
   }
-   
+
 
   findAll() {
- return this.rtspClient.send('findAllRtsp',{});
+    return this.rtspClient.send('findAllRtsp', {});
   }
 
   findOne(id: number) {
