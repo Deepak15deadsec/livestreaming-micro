@@ -19,24 +19,6 @@
         "tsConfigPath": "apps/api-gateway/tsconfig.app.json"
       }
     },
-    "books": {
-      "type": "application",
-      "root": "apps/books",
-      "entryFile": "main",
-      "sourceRoot": "apps/books/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/books/tsconfig.app.json"
-      }
-    },
-    "bookstore-api-gateway": {
-      "type": "application",
-      "root": "apps/bookstore-api-gateway",
-      "entryFile": "main",
-      "sourceRoot": "apps/bookstore-api-gateway/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/bookstore-api-gateway/tsconfig.app.json"
-      }
-    },
     "contracts": {
       "type": "library",
       "root": "libs/contracts",
