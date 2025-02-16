@@ -46,6 +46,15 @@
         "tsConfigPath": "libs/contracts/tsconfig.lib.json"
       }
     },
+    "recording": {
+      "type": "application",
+      "root": "apps/recording",
+      "entryFile": "main",
+      "sourceRoot": "apps/recording/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/recording/tsconfig.app.json"
+      }
+    },
     "rtsp": {
       "type": "application",
       "root": "apps/rtsp",

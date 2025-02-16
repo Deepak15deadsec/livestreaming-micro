@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { ApiGatewayController } from './api-gateway.controller';
 import { ApiGatewayService } from './api-gateway.service';
 import { RtspModule } from './rtsp/rtsp.module';
+import { RecordingModule } from './recording/recording.module';
 
 @Module({
-  imports: [RtspModule],
+  imports: [RtspModule, RecordingModule],
   controllers: [ApiGatewayController],
   providers: [ApiGatewayService],
 })

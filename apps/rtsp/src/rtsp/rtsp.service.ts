@@ -11,6 +11,7 @@ export class RtspService {
       id: 1, // Example initial data
       name: 'RTSP Stream 1',
       link: 'rtsp://example.com/stream',
+      path:'C/',
       createdAt: new Date().toISOString(),
     },
   ]; // In-memory storage for demonstration

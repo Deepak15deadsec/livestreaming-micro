@@ -8,4 +8,8 @@ export class CreateRtspDto {
   @IsString()
   @IsNotEmpty()
   link: string;
+
+  @IsString()
+  @IsNotEmpty()
+  path: string;
 }

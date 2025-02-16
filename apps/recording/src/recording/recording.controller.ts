@@ -1,0 +1,20 @@
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { RecordingService } from './recording.service';
+import { CreateRecordingDto } from './dto/create-recording.dto';
+import { UpdateRecordingDto } from './dto/update-recording.dto';
+
+@Controller()
+export class RecordingController {
+  constructor(private readonly recordingService: RecordingService) {}
+
+  @MessagePattern({ cmd: 'start-recording' })
+  startRecording(data: { output: string }) {
+    return this.recordingService.startRecording(data.output);
+  }
+
+  @MessagePattern({ cmd: 'stop-recording' })
+  stopRecording() {
+    return this.recordingService.stopRecording();
+  }
+}
