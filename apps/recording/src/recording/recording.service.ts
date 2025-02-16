@@ -17,12 +17,12 @@ export class RecordingService {
     this.logger.log(`Starting recording: ${outputPath}`);
 
     this.ffmpegProcess = spawn('ffmpeg', [
-      '-f', 'avfoundation', // Change based on OS (macOS: avfoundation, Linux: video4linux2, Windows: dshow)
-      '-i', '0', // Input device
-      '-r', '30', // Frame rate
-      '-c:v', 'libx264', // Codec
-      '-preset', 'ultrafast', // Speed
-      outputPath,
+      '-f', 'video4linux2', // Correct input format for Linux
+      '-i', '/dev/video0',  // Linux device path (Check using `v4l2-ctl --list-devices`)
+      '-r', '30',           // Frame rate
+      '-c:v', 'libx264',    // Codec
+      '-preset', 'ultrafast',
+      'output.mp4',
     ]);
 
     this.ffmpegProcess.stderr.on('data', (data) => {
