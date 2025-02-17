@@ -25,6 +25,10 @@ $ npm run start:dev
 $ nest start rtsp --watch
 $ nest start api-gateway --watch
 
+#postman url
+#http://localhost:4000/recording/start?output=record.mp4
+#http://localhost:4000/recording/stop
+
 # production mode
 $ npm run start:prod
 ```
