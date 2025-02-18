@@ -28,6 +28,15 @@
         "tsConfigPath": "libs/contracts/tsconfig.lib.json"
       }
     },
+    "gstreamer": {
+      "type": "application",
+      "root": "apps/gstreamer",
+      "entryFile": "main",
+      "sourceRoot": "apps/gstreamer/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/gstreamer/tsconfig.app.json"
+      }
+    },
     "recording": {
       "type": "application",
       "root": "apps/recording",
