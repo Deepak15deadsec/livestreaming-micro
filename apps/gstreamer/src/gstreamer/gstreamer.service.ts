@@ -1,9 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
 import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
 
 @Injectable()
 export class GstreamerService {
   private recordingProcess: ChildProcessWithoutNullStreams | null = null;
+  private streamingProcess: ChildProcessWithoutNullStreams | null = null;
   private logger = new Logger(GstreamerService.name);
 
   startRecording(outputFile: string): boolean {
@@ -61,5 +63,60 @@ export class GstreamerService {
     this.recordingProcess = null;
 
     return true;
+  }
+  startStreaming(rtspUrl: string): string {
+    if (this.streamingProcess) {
+      return 'Streaming is already in progress.';
+    }
+  
+    this.logger.log(`Starting RTSP streaming to ${rtspUrl}`);
+  
+    // Start the streaming process to a local UDP port
+    const pipeline = [
+      'v4l2src', 'device=/dev/video0', '!',
+      'videoconvert', '!',
+      'videoscale', '!',
+      'video/x-raw,format=I420,width=1280,height=720,framerate=30/1', '!',
+      'x264enc', 'bitrate=500', 'speed-preset=ultrafast', 'tune=zerolatency', '!',
+      'rtph264pay', 'config-interval=1', 'pt=96', '!',
+      'udpsink', `host=127.0.0.1`, 'port=5000'  // Localhost for local viewing
+    ];
+  
+    this.streamingProcess = spawn('gst-launch-1.0', pipeline);
+  
+    this.streamingProcess.stdout.on('data', (data) => {
+      this.logger.log(`GStreamer Output: ${data}`);
+    });
+  
+    this.streamingProcess.stderr.on('data', (data) => {
+      this.logger.error(`GStreamer Error: ${data}`);
+    });
+  
+    this.streamingProcess.on('close', (code) => {
+      this.logger.log(`Streaming stopped with exit code ${code}`);
+      this.streamingProcess = null;
+    });
+  
+    // Now, view the stream using a separate GStreamer command:
+    const displayPipeline = [
+      'udpsrc', 'port=5000', 'caps="application/x-rtp, media=video, encoding-name=H264, payload=96"', '!',
+      'rtph264depay', '!', 'avdec_h264', '!', 'videoconvert', '!', 'autovideosink'
+    ];
+  
+    spawn('gst-launch-1.0', displayPipeline);
+  
+    return 'Streaming started and displaying locally!';
+  }
+
+  stopStreaming(): string {
+    if (!this.streamingProcess) {
+      return 'No streaming in progress.';
+    }
+
+    this.logger.log('Stopping RTSP streaming...');
+    this.streamingProcess.kill('SIGINT');
+    this.streamingProcess = null;
+
+    return 'Streaming stopped.';
   }
 }

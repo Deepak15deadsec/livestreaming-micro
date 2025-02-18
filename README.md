@@ -25,9 +25,24 @@ $ npm run start:dev
 $ nest start rtsp --watch
 $ nest start api-gateway --watch
 
-#postman url
+#postman url ffmpeg------------------
 #http://localhost:4000/recording/start?output=record.mp4
 #http://localhost:4000/recording/stop
+
+#postman url gstreamer recording---------------------
+# curl --location 'http://localhost:4000/gstreamer/start' \
+# --header 'Content-Type: application/json' \
+# --data '{"outputFile": "output.mp4"}'
+
+#http://localhost:4000/gstreamer/stop
+
+#postman url gstreamer streaming--------------------------------
+#http://localhost:4000/gstreamer/stop-stream
+
+# curl --location 'http://localhost:4000/gstreamer/start-stream' \
+# --header 'Content-Type: application/json' \
+# --data '{"rtspUrl": "127.0.0.1"}'
+
 
 # production mode
 $ npm run start:prod

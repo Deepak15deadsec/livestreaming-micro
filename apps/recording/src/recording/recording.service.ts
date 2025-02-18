@@ -22,7 +22,7 @@ export class RecordingService {
       '-r', '30',           // Frame rate
       '-c:v', 'libx264',    // Codec
       '-preset', 'ultrafast',
-      'output.mp4',
+      'record.mp4',
     ]);
 
     this.ffmpegProcess.stderr.on('data', (data) => {

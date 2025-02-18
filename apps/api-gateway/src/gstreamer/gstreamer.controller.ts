@@ -23,4 +23,13 @@ export class GstreamerController {
   }
 
  
+  @Post('start-stream')
+  startStream(@Body('rtspUrl') rtspUrl: string) {
+    return this.streamClient.send({ cmd: 'start-stream' }, rtspUrl);
+  }
+
+  @Post('stop-stream')
+  stopStream() {
+    return this.streamClient.send({ cmd: 'stop-stream' }, {});
+  }
 }

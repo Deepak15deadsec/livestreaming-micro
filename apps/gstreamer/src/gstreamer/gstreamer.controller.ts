@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { GstreamerService } from './gstreamer.service';
 import { CreateGstreamerDto } from './dto/create-gstreamer.dto';
@@ -20,6 +20,19 @@ export class GstreamerController {
     const success = this.gstreamerService.stopRecording();
     return { message: success ? 'Recording stopped' : 'No recording in progress' };
   }
+
+  @MessagePattern({ cmd: 'start-stream' })
+  startStreaming(rtspUrl: string): string {
+    // this.logger.log(`Received start-stream command for ${rtspUrl}`);
+    return this.gstreamerService.startStreaming(rtspUrl);
+  }
+
+  @MessagePattern({ cmd: 'stop-stream' })
+  stopStreaming(): string {
+    // this.logger.log('Received stop-stream command');
+    return this.gstreamerService.stopStreaming();
+  }
+
 }
 
 
