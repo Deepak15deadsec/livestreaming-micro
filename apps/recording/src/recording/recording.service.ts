@@ -3,7 +3,6 @@ import { CreateRecordingDto } from './dto/create-recording.dto';
 import { UpdateRecordingDto } from './dto/update-recording.dto';
 import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
 
-
 @Injectable()
 export class RecordingService {
   private ffmpegProcess: ChildProcessWithoutNullStreams | null = null;
@@ -14,15 +13,18 @@ export class RecordingService {
       throw new Error('Recording is already in progress.');
     }
 
-    this.logger.log(`Starting recording: ${outputPath}`);
+    const rtspUrl = 'rtsp://807e9439d5ca.entrypoint.cloud.wowza.com:1935/app-rC94792j/068b9c9a_stream2';
+
+    this.logger.log(`Starting recording from RTSP stream: ${rtspUrl}`);
 
     this.ffmpegProcess = spawn('ffmpeg', [
-      '-f', 'video4linux2', // Correct input format for Linux
-      '-i', '/dev/video0',  // Linux device path (Check using `v4l2-ctl --list-devices`)
-      '-r', '30',           // Frame rate
-      '-c:v', 'libx264',    // Codec
-      '-preset', 'ultrafast',
-      'record.mp4',
+      '-rtsp_transport', 'tcp', // Use TCP for better stability
+      '-i', rtspUrl, // RTSP stream URL
+      '-r', '30', // Frame rate
+      '-c:v', 'libx264', // Video codec
+      '-preset', 'ultrafast', // Encoding speed
+      '-t', '3600', // Optional: Limit recording to 1 hour (remove if not needed)
+      outputPath,
     ]);
 
     this.ffmpegProcess.stderr.on('data', (data) => {
