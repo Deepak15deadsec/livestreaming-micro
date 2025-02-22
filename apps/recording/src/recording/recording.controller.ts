@@ -9,8 +9,8 @@ export class RecordingController {
   constructor(private readonly recordingService: RecordingService) {}
 
   @MessagePattern({ cmd: 'start-recording' })
-  startRecording(data: { output: string }) {
-    return this.recordingService.startRecording(data.output);
+  startRecording(data: { id: number; rtspUrl: string; output: string }) {
+    return this.recordingService.startRecording(data.id, data.rtspUrl, data.output);
   }
 
   @MessagePattern({ cmd: 'stop-recording' })

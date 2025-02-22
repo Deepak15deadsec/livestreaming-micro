@@ -17,7 +17,7 @@ export class RtspService {
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} rtsp`;
+    return this.rtspClient.send('findOneRtsp', id);
   }
 
   update(id: number, updateRtspDto: UpdateRtspDto) {

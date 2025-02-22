@@ -8,13 +8,13 @@ export class RecordingService {
   private ffmpegProcess: ChildProcessWithoutNullStreams | null = null;
   private readonly logger = new Logger(RecordingService.name);
 
-  startRecording(outputPath: string) {
+  startRecording(id: number, rtspUrl: string, outputPath: string)  {
     if (this.ffmpegProcess) {
       throw new Error('Recording is already in progress.');
     }
 
-    const rtspUrl = 'rtsp://807e9439d5ca.entrypoint.cloud.wowza.com:1935/app-rC94792j/068b9c9a_stream2';
-
+    // const rtspUrl = 'rtsp://807e9439d5ca.entrypoint.cloud.wowza.com:1935/app-rC94792j/068b9c9a_stream2';
+    
     this.logger.log(`Starting recording from RTSP stream: ${rtspUrl}`);
 
     this.ffmpegProcess = spawn('ffmpeg', [

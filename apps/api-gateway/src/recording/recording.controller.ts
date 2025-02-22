@@ -7,8 +7,11 @@ export class RecordingController {
   constructor(private readonly recordingService: RecordingService) {}
 
   @Get('start')
-  async startRecording(@Query('output') output: string) {
-    return await this.recordingService.startRecording(output || 'output.mp4');
+  async startRecording(@Query('id') id: number, @Query('output') output: string) {
+    if (!id) {
+      return { error: 'Missing required parameter: id' };
+    }
+    return await this.recordingService.startRecording(id, output || `record_${id}.mp4`);
   }
 
   @Get('stop')

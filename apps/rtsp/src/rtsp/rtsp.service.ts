@@ -10,7 +10,7 @@ export class RtspService {
     {
       id: 1, // Example initial data
       name: 'RTSP Stream 1',
-      link: 'rtsp://example.com/stream',
+      link: 'rtsp://807e9439d5ca.entrypoint.cloud.wowza.com:1935/app-rC94792j/068b9c9a_stream2',
       path:'C/',
       createdAt: new Date().toISOString(),
     },
@@ -37,8 +37,10 @@ export class RtspService {
     return this.rtspStreams; // Return all RTSP streams
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} rtsp`;
+  findOne(id: number): rtspDto | string {
+  
+    const stream = this.rtspStreams.find(rtsp => rtsp.id === Number(id));
+    return stream ? stream : `RTSP stream with ID #${id} not found`;
   }
 
   update(id: number, updateRtspDto: UpdateRtspDto) {

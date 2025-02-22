@@ -24,6 +24,7 @@ export class RtspController {
 
   @MessagePattern('findOneRtsp')
   findOne(@Payload() id: number) {
+    console.log("ffffff",id)
     return this.rtspService.findOne(id);
   }
 
