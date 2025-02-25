@@ -69,17 +69,13 @@ export class GstreamerService {
       return 'Streaming is already in progress.';
     }
   
-    this.logger.log(`Starting RTSP streaming to ${rtspUrl}`);
+    this.logger.log(`Starting RTSP streaming from ${rtspUrl}`);
   
-    // Start the streaming process to a local UDP port
+    // GStreamer pipeline to fetch RTSP stream and forward it locally
     const pipeline = [
-      'v4l2src', 'device=/dev/video0', '!',
-      'videoconvert', '!',
-      'videoscale', '!',
-      'video/x-raw,format=I420,width=1280,height=720,framerate=30/1', '!',
-      'x264enc', 'bitrate=500', 'speed-preset=ultrafast', 'tune=zerolatency', '!',
-      'rtph264pay', 'config-interval=1', 'pt=96', '!',
-      'udpsink', `host=127.0.0.1`, 'port=5000'  // Localhost for local viewing
+      'rtspsrc', `location=${rtspUrl}`, 'protocols=4', 'latency=200', '!',
+      'rtpmp4vdepay', '!', 'decodebin', '!',
+      'videoconvert', '!', 'autovideosink'
     ];
   
     this.streamingProcess = spawn('gst-launch-1.0', pipeline);
@@ -97,15 +93,7 @@ export class GstreamerService {
       this.streamingProcess = null;
     });
   
-    // Now, view the stream using a separate GStreamer command:
-    const displayPipeline = [
-      'udpsrc', 'port=5000', 'caps="application/x-rtp, media=video, encoding-name=H264, payload=96"', '!',
-      'rtph264depay', '!', 'avdec_h264', '!', 'videoconvert', '!', 'autovideosink'
-    ];
-  
-    spawn('gst-launch-1.0', displayPipeline);
-  
-    return 'Streaming started and displaying locally!';
+    return 'RTSP streaming started and displaying locally!';
   }
 
   stopStreaming(): string {
