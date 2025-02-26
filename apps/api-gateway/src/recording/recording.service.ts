@@ -10,23 +10,23 @@ export class RecordingService {
   constructor(
     @Inject('REC_CLIENT') private recClient: ClientProxy,
     @Inject('RTSP_CLIENT') private rtspClient: ClientProxy, // Inject RTSP microservice
-  ) {}
+  ) { }
 
 
- async startRecording(id: number, output: string) {
+  async startRecording(id: number, output: string) {
     try {
       // Fetch RTSP URL from the RTSP microservice
       console.log(id)
       const rtspResponse = await this.rtspClient.send('findOneRtsp', id).toPromise();
 
-      console.log(`Full RTSP Response for ID ${id}:`, rtspResponse); 
+      console.log(`Full RTSP Response for ID ${id}:`, rtspResponse);
 
-    if (!rtspResponse || !rtspResponse.link) {
-      throw new Error(`No RTSP URL found for ID ${id}`);
-    }
+      if (!rtspResponse || !rtspResponse.link) {
+        throw new Error(`No RTSP URL found for ID ${id}`);
+      }
 
-    const rtspUrl = rtspResponse.link; // Extract the path
-    console.log(`RTSP URL for ID ${id}: ${rtspUrl}`);
+      const rtspUrl = rtspResponse.link; // Extract the path
+      console.log(`RTSP URL for ID ${id}: ${rtspUrl}`);
       // Start recording using the retrieved RTSP URL
       return this.recClient.send({ cmd: 'start-recording' }, { rtspUrl, output });
     } catch (error) {
@@ -35,9 +35,9 @@ export class RecordingService {
     }
   }
 
-  stopRecording() {
-    return this.recClient.send({ cmd: 'stop-recording' }, {});
+  stopRecording(id: number) {
+    return this.recClient.send({ cmd: 'stop-recording' }, { id }).toPromise();
   }
 
-  f
+
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query } from '@nestjs/common';
 import { GstreamerService } from './gstreamer.service';
 import { CreateGstreamerDto } from './dto/create-gstreamer.dto';
 import { UpdateGstreamerDto } from './dto/update-gstreamer.dto';
@@ -7,8 +7,9 @@ import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('gstreamer')
 export class GstreamerController {
-  
-  constructor(@Inject('STREAM_CLIENT') private streamClient: ClientProxy) { }
+
+  constructor(@Inject('STREAM_CLIENT') private streamClient: ClientProxy,
+    @Inject('RTSP_CLIENT') private rtspClient: ClientProxy,) { }
 
   @Post('start')
   async startRecording(@Body('outputFile') outputFile: string) {
@@ -22,14 +23,31 @@ export class GstreamerController {
     return response;
   }
 
- 
+
   @Post('start-stream')
-  startStream(@Body('rtspUrl') rtspUrl: string) {
-    return this.streamClient.send({ cmd: 'start-stream' }, rtspUrl);
+  async startStream(@Query('id') id: number) {
+    // Fetch the RTSP URL from the RTSP service
+    const rtspResponse = await this.rtspClient.send('findOneRtsp', id).toPromise();
+
+    console.log(`Full RTSP Response for ID ${id}:`, rtspResponse);
+
+    // Check if the response contains a valid RTSP URL
+    if (!rtspResponse || !rtspResponse.link) {
+      throw new Error(`No RTSP URL found for ID ${id}`);
+    }
+
+    const rtspUrl = rtspResponse.link; // Extract the RTSP URL
+
+    // Use ID as the stream identifier
+    return this.streamClient.send({ cmd: 'start-stream' }, { streamId: id, rtspUrl });
   }
 
   @Post('stop-stream')
-  stopStream() {
-    return this.streamClient.send({ cmd: 'stop-stream' }, {});
+  stopStream(@Query('id') id: number) {
+    if (!id) {
+      throw new Error(`Stream ID is required to stop streaming`);
+    }
+
+    return this.streamClient.send({ cmd: 'stop-stream' }, { streamId: id });
   }
 }

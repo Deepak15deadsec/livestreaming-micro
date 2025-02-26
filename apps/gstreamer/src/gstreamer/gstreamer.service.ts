@@ -5,7 +5,7 @@ import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
 @Injectable()
 export class GstreamerService {
   private recordingProcess: ChildProcessWithoutNullStreams | null = null;
-  private streamingProcess: ChildProcessWithoutNullStreams | null = null;
+  private streamingProcess= new Map<string, ChildProcessWithoutNullStreams>();
   private logger = new Logger(GstreamerService.name);
 
   startRecording(outputFile: string): boolean {
@@ -64,47 +64,48 @@ export class GstreamerService {
 
     return true;
   }
-  startStreaming(rtspUrl: string): string {
-    if (this.streamingProcess) {
-      return 'Streaming is already in progress.';
+  startStreaming(streamId: string, rtspUrl: string): string {
+    if (this.streamingProcess.has(streamId)) {
+      return `Streaming with ID ${streamId} is already in progress.`;
     }
-  
-    this.logger.log(`Starting RTSP streaming from ${rtspUrl}`);
-  
-    // GStreamer pipeline to fetch RTSP stream and forward it locally
+
+    this.logger.log(`Starting RTSP streaming for ID ${streamId} from ${rtspUrl}`);
+
     const pipeline = [
-      'rtspsrc', `location=${rtspUrl}`, 'protocols=4', 'latency=200', '!',
-      'rtpmp4vdepay', '!', 'decodebin', '!',
+      'rtspsrc', `location=${rtspUrl}`, 'protocols=tcp', 'latency=200', '!',
+      'decodebin', '!',
       'videoconvert', '!', 'autovideosink'
     ];
-  
-    this.streamingProcess = spawn('gst-launch-1.0', pipeline);
-  
-    this.streamingProcess.stdout.on('data', (data) => {
-      this.logger.log(`GStreamer Output: ${data}`);
+    const process = spawn('gst-launch-1.0', pipeline);
+    this.streamingProcess.set(streamId, process);
+
+    process.stdout.on('data', (data) => {
+      this.logger.log(`GStreamer Output [${streamId}]: ${data}`);
     });
-  
-    this.streamingProcess.stderr.on('data', (data) => {
-      this.logger.error(`GStreamer Error: ${data}`);
+
+    process.stderr.on('data', (data) => {
+      this.logger.error(`GStreamer Error [${streamId}]: ${data}`);
     });
-  
-    this.streamingProcess.on('close', (code) => {
-      this.logger.log(`Streaming stopped with exit code ${code}`);
-      this.streamingProcess = null;
+
+    process.on('close', (code) => {
+      this.logger.log(`Streaming with ID ${streamId} stopped with exit code ${code}`);
+      this.streamingProcess.delete(streamId);
     });
-  
-    return 'RTSP streaming started and displaying locally!';
+
+    return `RTSP streaming started with ID ${streamId}`;
   }
 
-  stopStreaming(): string {
-    if (!this.streamingProcess) {
-      return 'No streaming in progress.';
+  stopStreaming(streamId: string): string {
+    const process = this.streamingProcess.get(streamId);
+    if (!process) {
+      return `No streaming found with ID ${streamId}.`;
     }
 
-    this.logger.log('Stopping RTSP streaming...');
-    this.streamingProcess.kill('SIGINT');
-    this.streamingProcess = null;
+    this.logger.log(`Stopping RTSP streaming for ID ${streamId}...`);
+    process.kill('SIGINT');
+    this.streamingProcess.delete(streamId);
 
-    return 'Streaming stopped.';
+    return `Streaming with ID ${streamId} stopped.`;
   }
 }
+

@@ -17,7 +17,7 @@ export class RtspService {
     {
       id: 2, // Example initial data
       name: 'RTSP Stream 2',
-      link: 'rtsp://localhost:8554/webcam',
+      link: 'rtsp://localhost:8554/akash',
       path:'C/',
       createdAt: new Date().toISOString(),
     },

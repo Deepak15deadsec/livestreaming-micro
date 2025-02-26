@@ -39,7 +39,7 @@ export class RecordingService {
     return { message: 'Recording started', outputPath };
   }
 
-  stopRecording() {
+  stopRecording(id:number) {
     if (!this.ffmpegProcess) {
       throw new Error('No recording in progress.');
     }

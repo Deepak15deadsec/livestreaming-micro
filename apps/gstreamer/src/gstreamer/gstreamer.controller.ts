@@ -22,15 +22,15 @@ export class GstreamerController {
   }
 
   @MessagePattern({ cmd: 'start-stream' })
-  startStreaming(rtspUrl: string): string {
-    // this.logger.log(`Received start-stream command for ${rtspUrl}`);
-    return this.gstreamerService.startStreaming(rtspUrl);
+  startStreaming(data: { streamId: string; rtspUrl: string }): string {
+    const { streamId, rtspUrl } = data;
+    return this.gstreamerService.startStreaming(streamId, rtspUrl);
   }
-
+  
   @MessagePattern({ cmd: 'stop-stream' })
-  stopStreaming(): string {
-    // this.logger.log('Received stop-stream command');
-    return this.gstreamerService.stopStreaming();
+  stopStreaming(data: { streamId: string }): string {
+    const { streamId } = data;
+    return this.gstreamerService.stopStreaming(streamId);
   }
 
 }

@@ -14,7 +14,7 @@ export class RecordingController {
   }
 
   @MessagePattern({ cmd: 'stop-recording' })
-  stopRecording() {
-    return this.recordingService.stopRecording();
+  stopRecording(data: { id: number }) {
+    return this.recordingService.stopRecording(data.id);
   }
 }

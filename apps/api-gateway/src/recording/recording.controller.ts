@@ -15,7 +15,10 @@ export class RecordingController {
   }
 
   @Get('stop')
-  async stopRecording() {
-    return await this.recordingService.stopRecording();
+  async stopRecording(@Query('id') id: number) {
+    if (!id) {
+      return { error: 'Missing required parameter: id' };
+    }
+    return await this.recordingService.stopRecording(id);
   }
 }
