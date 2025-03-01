@@ -3,51 +3,74 @@ import { CreateRecordingDto } from './dto/create-recording.dto';
 import { UpdateRecordingDto } from './dto/update-recording.dto';
 import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
 
+
 @Injectable()
 export class RecordingService {
-  private ffmpegProcess: ChildProcessWithoutNullStreams | null = null;
-  private readonly logger = new Logger(RecordingService.name);
+ private ffmpegProcess: Record<number, ChildProcessWithoutNullStreams> = {}; // Store processes per ID
+ private readonly logger = new Logger(RecordingService.name);
 
-  startRecording(id: number, rtspUrl: string, outputPath: string)  {
-    if (this.ffmpegProcess) {
-      throw new Error('Recording is already in progress.');
-    }
 
-    // const rtspUrl = 'rtsp://807e9439d5ca.entrypoint.cloud.wowza.com:1935/app-rC94792j/068b9c9a_stream2';
-    
-    this.logger.log(`Starting recording from RTSP stream: ${rtspUrl}`);
+ startRecording(id: number, rtspUrl: string, outputPath: string)  {
+   if (this.ffmpegProcess[id]) {
+     throw new Error('Recording is already in progress.');
+   }
 
-    this.ffmpegProcess = spawn('ffmpeg', [
-      '-rtsp_transport', 'tcp', // Use TCP for better stability
-      '-i', rtspUrl, // RTSP stream URL
-      '-r', '30', // Frame rate
-      '-c:v', 'libx264', // Video codec
-      '-preset', 'ultrafast', // Encoding speed
-      '-t', '3600', // Optional: Limit recording to 1 hour (remove if not needed)
-      outputPath,
+
+   // const rtspUrl = 'rtsp://807e9439d5ca.entrypoint.cloud.wowza.com:1935/app-rC94792j/068b9c9a_stream2';
+  
+   this.logger.log(`Starting recording from RTSP stream: ${rtspUrl}`);
+
+  
+
+
+   try {
+    this.ffmpegProcess[id] = spawn('ffmpeg', [
+        '-rtsp_transport', 'tcp',
+        '-i', rtspUrl,
+        '-r', '30',
+        '-c:v', 'libx264',
+        '-preset', 'ultrafast',
+        '-t', '3600',
+        outputPath,
     ]);
+} catch (error) {
+    this.logger.error(`Error starting FFmpeg for ID ${id}: ${error.message}`);
+}
 
-    this.ffmpegProcess.stderr.on('data', (data) => {
-      this.logger.error(`FFmpeg Error: ${data}`);
-    });
 
-    this.ffmpegProcess.on('close', (code) => {
-      this.logger.log(`FFmpeg process exited with code ${code}`);
-      this.ffmpegProcess = null;
-    });
 
-    return { message: 'Recording started', outputPath };
-  }
+   this.ffmpegProcess[id].stderr.on('data', (data) => {
+     this.logger.error(`FFmpeg Error (ID ${id}): ${data}`);
+   });
 
-  stopRecording(id:number) {
-    if (!this.ffmpegProcess) {
-      throw new Error('No recording in progress.');
-    }
 
-    this.ffmpegProcess.kill('SIGINT');
-    this.logger.log('Recording stopped.');
-    this.ffmpegProcess = null;
-    
-    return { message: 'Recording stopped' };
-  }
+   this.ffmpegProcess[id].on('close', (code) => {
+     this.logger.log(`FFmpeg process for ID ${id} exited with code ${code}`);
+     if (this.ffmpegProcess[id]) delete this.ffmpegProcess[id]; // Only delete if it exists
+   });
+
+   this.logger.log(`Existing recording IDs: ${Object.keys(this.ffmpegProcess)}`);
+
+   return { message: 'Recording started', id, rtspUrl, outputPath };
+ }
+
+
+ stopRecording(id: number) {
+
+  this.logger.log(`Existing recording IDs: ${Object.keys(this.ffmpegProcess)}`);
+
+   if (!this.ffmpegProcess[id]) {
+     throw new Error(`No recording in progress for ID ${id}`);
+   }
+
+
+   this.ffmpegProcess[id].kill('SIGKILL');
+   this.logger.log(`Recording stopped for ID ${id}`);
+   delete this.ffmpegProcess[id];
+
+
+   return { message: `Recording stopped for ID ${id}` };
+ }
+
+
 }

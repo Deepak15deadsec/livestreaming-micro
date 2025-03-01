@@ -28,7 +28,7 @@ export class RecordingService {
       const rtspUrl = rtspResponse.link; // Extract the path
       console.log(`RTSP URL for ID ${id}: ${rtspUrl}`);
       // Start recording using the retrieved RTSP URL
-      return this.recClient.send({ cmd: 'start-recording' }, { rtspUrl, output });
+      return this.recClient.send({ cmd: 'start-recording' }, {id, rtspUrl, output });
     } catch (error) {
       console.error(`Error starting recording: ${error.message}`);
       throw error;
