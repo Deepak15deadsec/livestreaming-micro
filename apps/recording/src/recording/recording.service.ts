@@ -25,33 +25,74 @@ export class RecordingService {
 
    try {
     this.ffmpegProcess[id] = spawn('ffmpeg', [
-        '-rtsp_transport', 'tcp',
-        '-i', rtspUrl,
-        '-r', '30',
-        '-c:v', 'libx264',
-        '-preset', 'ultrafast',
-        '-t', '3600',
-        outputPath,
+      // Improve connection reliability
+      '-rtsp_transport', 'tcp',
+      '-timeout', '5000000',  // Increase timeout (5 seconds)
+      
+      // Input
+      '-i', rtspUrl,
+      
+      // Error recovery options
+      '-err_detect', 'ignore_err',
+      '-analyzeduration', '10000000',  // Increase analysis time
+      
+      // Video encoding options
+      '-r', '30',
+      '-c:v', 'libx264',
+      '-preset', 'ultrafast',
+      '-tune', 'zerolatency',   // Reduce latency
+      '-pix_fmt', 'yuv420p',    // More compatible pixel format
+      '-profile:v', 'baseline', // More compatible profile
+      '-level', '3.0',
+      '-maxrate', '2000k',
+      '-bufsize', '4000k',
+      
+      // Duration limit
+      '-t', '3600',
+      
+      // Output
+      '-f', 'mp4',              // Explicitly specify format
+      outputPath,
     ]);
-} catch (error) {
+
+    this.logger.log(`FFmpeg process started for ID ${id}`);
+    
+    // Monitor stdout for progress info
+    this.ffmpegProcess[id].stdout.on('data', (data) => {
+      this.logger.debug(`FFmpeg Output (ID ${id}): ${data}`);
+    });
+
+    this.ffmpegProcess[id].stderr.on('data', (data) => {
+      const message = data.toString();
+      // Only log actual errors, not the regular FFmpeg output that comes through stderr
+      if (message.includes('Error') || message.includes('error') || message.includes('fail')) {
+        this.logger.error(`FFmpeg Error (ID ${id}): ${message}`);
+      } else {
+        this.logger.debug(`FFmpeg Info (ID ${id}): ${message}`);
+      }
+    });
+
+    this.ffmpegProcess[id].on('close', (code) => {
+      this.logger.log(`FFmpeg process for ID ${id} exited with code ${code}`);
+      if (code !== 0) {
+        this.logger.warn(`FFmpeg process for ID ${id} exited abnormally with code ${code}`);
+      }
+      if (this.ffmpegProcess[id]) delete this.ffmpegProcess[id]; // Only delete if it exists
+    });
+
+    this.ffmpegProcess[id].on('error', (err) => {
+      this.logger.error(`FFmpeg process error for ID ${id}: ${err.message}`);
+      if (this.ffmpegProcess[id]) delete this.ffmpegProcess[id];
+    });
+
+    this.logger.log(`Active recording IDs: ${Object.keys(this.ffmpegProcess)}`);
+
+    return { message: 'Recording started', id, rtspUrl, outputPath };
+
+  } catch (error) {
     this.logger.error(`Error starting FFmpeg for ID ${id}: ${error.message}`);
-}
-
-
-
-   this.ffmpegProcess[id].stderr.on('data', (data) => {
-     this.logger.error(`FFmpeg Error (ID ${id}): ${data}`);
-   });
-
-
-   this.ffmpegProcess[id].on('close', (code) => {
-     this.logger.log(`FFmpeg process for ID ${id} exited with code ${code}`);
-     if (this.ffmpegProcess[id]) delete this.ffmpegProcess[id]; // Only delete if it exists
-   });
-
-   this.logger.log(`Existing recording IDs: ${Object.keys(this.ffmpegProcess)}`);
-
-   return { message: 'Recording started', id, rtspUrl, outputPath };
+    throw error;
+  }
  }
 
 
@@ -64,7 +105,7 @@ export class RecordingService {
    }
 
 
-   this.ffmpegProcess[id].kill('SIGKILL');
+   this.ffmpegProcess[id].kill('SIGINT');
    this.logger.log(`Recording stopped for ID ${id}`);
    delete this.ffmpegProcess[id];
 

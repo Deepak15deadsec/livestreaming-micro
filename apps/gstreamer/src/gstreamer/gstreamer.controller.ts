@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { GstreamerService } from './gstreamer.service';
 import { CreateGstreamerDto } from './dto/create-gstreamer.dto';
@@ -32,6 +32,12 @@ export class GstreamerController {
     const { streamId } = data;
     return this.gstreamerService.stopStreaming(streamId);
   }
+
+  @MessagePattern('stream_dash') // Define a message pattern
+  async streamDASH(@Payload() rtspUrl: string): Promise<Buffer> {
+    return this.gstreamerService.streamDASH(rtspUrl);
+  }
+
 
 }
 

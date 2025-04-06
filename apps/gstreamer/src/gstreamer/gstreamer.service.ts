@@ -1,12 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { spawn, ChildProcessWithoutNullStreams } from 'child_process';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { Response } from 'express';
 
 @Injectable()
 export class GstreamerService {
   private recordingProcess: ChildProcessWithoutNullStreams | null = null;
   private streamingProcess= new Map<string, ChildProcessWithoutNullStreams>();
   private logger = new Logger(GstreamerService.name);
+  constructor(private readonly httpService: HttpService) {}
 
   startRecording(outputFile: string): boolean {
     if (this.recordingProcess) {
@@ -106,6 +110,26 @@ export class GstreamerService {
     this.streamingProcess.delete(streamId);
 
     return `Streaming with ID ${streamId} stopped.`;
+  }
+
+
+  async streamDASH(rtspUrl: string): Promise<Buffer> {
+    if (!rtspUrl) {
+      throw new Error('RTSP URL is required');
+    }
+
+    // Encode the RTSP URL to pass it as a query parameter for DASH conversion
+    const encodedUrl = encodeURIComponent(rtspUrl);
+    // Updated endpoint: change '/api/stream' to '/stream'
+    const go2rtcUrl = `http://localhost:1984/stream?url=${encodedUrl}&format=dash`;
+
+    try {
+      const response = await firstValueFrom(this.httpService.get(go2rtcUrl, { responseType: 'arraybuffer' }));
+      return response.data; // Return the stream data as a Buffer
+    } catch (error) {
+      console.error('Error streaming DASH:', error);
+      throw new Error('Error streaming DASH');
+    }
   }
 }
 

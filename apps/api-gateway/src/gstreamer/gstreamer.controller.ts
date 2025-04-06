@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query, Res } from '@nestjs/common';
 import { GstreamerService } from './gstreamer.service';
 import { CreateGstreamerDto } from './dto/create-gstreamer.dto';
 import { UpdateGstreamerDto } from './dto/update-gstreamer.dto';
 import { ClientProxy } from '@nestjs/microservices';
+import { Response } from 'express';
 
 
 @Controller('gstreamer')
@@ -49,5 +50,21 @@ export class GstreamerController {
     }
 
     return this.streamClient.send({ cmd: 'stop-stream' }, { streamId: id });
+  }
+
+  @Get('dash')
+  async streamDASH(@Query('url') rtspUrl: string, @Res() res: Response) {
+    if (!rtspUrl) {
+      return res.status(400).send('RTSP URL is required');
+    }
+
+    try {
+      const streamData = await this.streamClient.send<Buffer>('stream_dash', rtspUrl).toPromise();
+      res.set('Content-Type', 'application/dash+xml');
+      res.send(streamData);
+    } catch (error) {
+      console.error('Error in streamDASH:', error.message);
+      res.status(500).send(error.message);
+    }
   }
 }
