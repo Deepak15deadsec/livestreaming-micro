@@ -33,10 +33,7 @@ export class GstreamerController {
     return this.gstreamerService.stopStreaming(streamId);
   }
 
-  @MessagePattern('stream_dash') // Define a message pattern
-  async streamDASH(@Payload() rtspUrl: string): Promise<Buffer> {
-    return this.gstreamerService.streamDASH(rtspUrl);
-  }
+ 
 
 
 }

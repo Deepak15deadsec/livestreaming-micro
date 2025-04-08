@@ -113,23 +113,6 @@ export class GstreamerService {
   }
 
 
-  async streamDASH(rtspUrl: string): Promise<Buffer> {
-    if (!rtspUrl) {
-      throw new Error('RTSP URL is required');
-    }
 
-    // Encode the RTSP URL to pass it as a query parameter for DASH conversion
-    const encodedUrl = encodeURIComponent(rtspUrl);
-    // Updated endpoint: change '/api/stream' to '/stream'
-    const go2rtcUrl = `http://localhost:1984/stream?url=${encodedUrl}&format=dash`;
-
-    try {
-      const response = await firstValueFrom(this.httpService.get(go2rtcUrl, { responseType: 'arraybuffer' }));
-      return response.data; // Return the stream data as a Buffer
-    } catch (error) {
-      console.error('Error streaming DASH:', error);
-      throw new Error('Error streaming DASH');
-    }
-  }
 }
 

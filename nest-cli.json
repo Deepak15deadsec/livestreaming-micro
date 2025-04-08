@@ -54,6 +54,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/rtsp/tsconfig.app.json"
       }
+    },
+    "go2rtc": {
+      "type": "application",
+      "root": "apps/go2rtc",
+      "entryFile": "main",
+      "sourceRoot": "apps/go2rtc/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/go2rtc/tsconfig.app.json"
+      }
     }
   }
 }
